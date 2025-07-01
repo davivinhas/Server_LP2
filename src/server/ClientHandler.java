@@ -99,7 +99,7 @@ public class ClientHandler implements Runnable{
             isAdmin = true;
         }
 
-        this.username = attemptUsername;
+        this.username = username;
         server.addClient(this);
 
         if (isAdmin) {

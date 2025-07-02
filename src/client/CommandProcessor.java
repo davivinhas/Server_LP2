@@ -53,6 +53,6 @@ public class CommandProcessor
         if(commandParts.length >= 3) {
             key = commandParts[2];
         }
-        out.println("Login " + username + ":" + key);
+        out.println("login:" + username + ":" + key);
     }
 }

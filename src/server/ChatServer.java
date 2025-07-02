@@ -10,15 +10,16 @@ public class ChatServer {
     private final int port;
     private boolean isRunning;
     private ExecutorService threadPool;
-
+    private RoomManager roomManager;
     // Estruturas de dados para gerenciar clientes e salas
     private final ConcurrentHashMap<String, ClientHandler> clients = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Set<ClientHandler>> rooms = new ConcurrentHashMap<>();
+
 
     public ChatServer(int port) {
         this.port = port;
         this.isRunning = false;
         this.threadPool = Executors.newCachedThreadPool();
+        this.roomManager = new RoomManager();
     }
 
     public void start() {
@@ -67,6 +68,39 @@ public class ChatServer {
         }
     }
 
+    // Métodos para gerenciar salas
+    public boolean createRoom(String roomName) {
+        return roomManager.createRoom(roomName);
+    }
+
+    public boolean enterRoom(ClientHandler client, String roomName) {
+        return roomManager.enterRoom(roomName, client);
+    }
+
+    public boolean exitRoom(ClientHandler client, String roomName) {
+        return (roomManager.exitRoom(roomName, client));
+    }
+
+    public boolean closeRoom(String roomName) {
+        return roomManager.endRoom(roomName);
+    }
+
+    public void broadcastToRoom(String roomName, String message, ClientHandler sender) {
+        roomManager.broadcastToRoom(roomName, message, sender);
+    }
+
+    public String getRoomsList() {
+        return roomManager.listRooms();
+    }
+
+    public String getUsersInRoom(String roomName) {
+        return roomManager.getUsersInRoom(roomName);
+    }
+
+    public boolean kickUserFromRoom(String roomName, String username) {
+        return roomManager.kickUser(roomName, username);
+    }
+
     // Métodos para gerenciar clientes
     public synchronized void addClient(ClientHandler client) {
         clients.put(client.getUsername(), client);
@@ -80,127 +114,6 @@ public class ChatServer {
 
     public boolean isUsernameTaken(String username) {
         return clients.containsKey(username);
-    }
-
-    // Métodos para gerenciar salas
-    public synchronized boolean createRoom(String roomName) {
-        if (rooms.containsKey(roomName)) {
-            return false;
-        }
-        rooms.put(roomName, ConcurrentHashMap.newKeySet());
-        System.out.println("Sala '" + roomName + "' criada");
-        return true;
-    }
-
-    public synchronized boolean enterRoom(ClientHandler client, String roomName) {
-        // Cria a sala se não existir
-        if (!rooms.containsKey(roomName)) {
-            createRoom(roomName);
-        }
-
-        Set<ClientHandler> roomClients = rooms.get(roomName);
-        roomClients.add(client);
-
-        // Notifica outros usuários na sala
-        broadcastToRoom(roomName, "INFO:" + client.getUsername() + " entrou na sala", client);
-
-        System.out.println(client.getUsername() + " entrou na sala: " + roomName);
-        return true;
-    }
-
-    public synchronized void exitRoom(ClientHandler client, String roomName) {
-        Set<ClientHandler> roomClients = rooms.get(roomName);
-        if (roomClients != null) {
-            roomClients.remove(client);
-
-            // Notifica outros usuários na sala
-            broadcastToRoom(roomName, "INFO:" + client.getUsername() + " saiu da sala", null);
-
-            // Remove sala se estiver vazia
-            if (roomClients.isEmpty()) {
-                rooms.remove(roomName);
-                System.out.println("Sala '" + roomName + "' removida (vazia)");
-            }
-
-            System.out.println(client.getUsername() + " saiu da sala: " + roomName);
-        }
-    }
-
-    public synchronized boolean closeRoom(String roomName) {
-        Set<ClientHandler> roomClients = rooms.get(roomName);
-        if (roomClients == null) {
-            return false;
-        }
-
-        // Notifica todos os usuários na sala
-        for (ClientHandler client : roomClients) {
-            client.sendMessage("INFO:A sala '" + roomName + "' foi encerrada pelo administrador");
-        }
-
-        rooms.remove(roomName);
-        System.out.println("Sala '" + roomName + "' encerrada por administrador");
-        return true;
-    }
-
-    public void broadcastToRoom(String roomName, String message, ClientHandler sender) {
-        Set<ClientHandler> roomClients = rooms.get(roomName);
-        if (roomClients != null) {
-            for (ClientHandler client : roomClients) {
-                if (client != sender && client.isConnected()) {
-                    client.sendMessage(message);
-                }
-            }
-        }
-    }
-
-    public String getRoomsList() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Set<ClientHandler>> entry : rooms.entrySet()) {
-            if (sb.isEmpty()) sb.append(",");
-            sb.append(entry.getKey()).append("|").append(entry.getValue().size());
-        }
-        return sb.toString();
-    }
-
-    public String getUsersInRoom(String roomName) {
-        Set<ClientHandler> roomClients = rooms.get(roomName);
-        if (roomClients == null) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (ClientHandler client : roomClients) {
-            if (sb.isEmpty()) sb.append(",");
-            sb.append(client.getUsername()).append("|");
-            if (client.isAdmin()) {
-                sb.append("admin");
-            } else {
-                sb.append("user");
-            }
-        }
-        return sb.toString();
-    }
-
-    public synchronized boolean kickUserFromRoom(String roomName, String username) {
-        Set<ClientHandler> roomClients = rooms.get(roomName);
-        if (roomClients == null) {
-            return false;
-        }
-
-        ClientHandler targetClient = clients.get(username);
-        if (targetClient == null || !roomClients.contains(targetClient)) {
-            return false;
-        }
-
-        roomClients.remove(targetClient);
-        targetClient.sendMessage("INFO:Você foi expulso da sala '" + roomName + "' por um administrador");
-
-        // Remove sala se estiver vazia
-        if (roomClients.isEmpty()) {
-            rooms.remove(roomName);
-        }
-
-        return true;
     }
 
     public static void main(String[] args) {

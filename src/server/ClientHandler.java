@@ -16,7 +16,7 @@ public class ClientHandler implements Runnable{
     public ClientHandler(Socket socket, ChatServer server) {
         this.socket = socket;
         this.server = server;
-        this.connected = false;
+        this.connected = true;
         this.username = null;
         this.currentRoom = null;
         this.isAdmin = false;
@@ -50,7 +50,7 @@ public class ClientHandler implements Runnable{
         String data = parts.length > 1? parts[1] : "";
 
         switch(command){
-            case "Login":
+            case "login":
                 processLogin(data);
                 break;
             case "LISTAR_SALAS":
@@ -139,7 +139,9 @@ public class ClientHandler implements Runnable{
     }
 
     private void exitRoom() {
-        if (!isLoggedIn()) return;
+        if (!isLoggedIn()){
+            return;
+        }
 
         if (currentRoom == null) {
             sendError("Você não está em nenhuma sala.");

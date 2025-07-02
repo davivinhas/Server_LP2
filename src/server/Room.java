@@ -12,21 +12,29 @@ public class Room {
         this.users = new ArrayList<>();
     }
 
-    public synchronized void addUser(ClientHandler usuario){
-        users.add(usuario);
-        broadcast("INFO:" + usuario.getUsername() + " entrou na sala.");
+    public synchronized void addUser(ClientHandler user){
+        users.add(user);
+        broadcastToOthers("INFO:" + user.getUsername() + " entrou na sala.", user);
     }
 
-    public synchronized void removeUser(ClientHandler usuario) {
-        users.remove(usuario);
-        broadcast("INFO:" + usuario.getUsername() + " saiu da sala.");
+    public synchronized void removeUser(ClientHandler user) {
+        users.remove(user);
+        broadcastToOthers("INFO:" + user.getUsername() + " saiu da sala.", user);
     }
 
-    public synchronized void broadcast(String mensagem) {
-        for (ClientHandler usuario : users) {
-            usuario.sendMessage(mensagem);
+    public synchronized void broadcastToOthers(String message, ClientHandler sender) {
+        for (ClientHandler user : users) {
+            if (user != sender && user.isConnected()) {
+                user.sendMessage(message);
+            }
         }
     }
+
+    public synchronized void broadcastChatMessage(String message, ClientHandler sender) {
+        String formattedMessage = "MSG:" + sender.getUsername() + ":" + name + ":" + message;
+        broadcastToOthers(formattedMessage, sender);
+    }
+
 
     public synchronized String getName() {
         return name;
@@ -55,5 +63,4 @@ public class Room {
         }
         return false;
     }
-
 }

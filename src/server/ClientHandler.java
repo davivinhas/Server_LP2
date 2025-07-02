@@ -63,7 +63,7 @@ public class ClientHandler implements Runnable{
                 exitRoom();
                 break;
             case "MENSAGEM":
-                sendMessage(data);
+                sendChatMessage(data);
                 break;
             case "CRIAR_SALA":
                 createRoom(data);

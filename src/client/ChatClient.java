@@ -107,11 +107,11 @@ public class ChatClient {
                 String message;
                 while(conected && ((message = input.readLine()) != null)){
                     if (message.startsWith("ERRO:")) {
-                        System.err.println("❌ " + message.substring(5));
+                        System.err.println("-> " + message.substring(5));
                     } else if (message.startsWith("SUCESSO:")) {
-                        System.out.println("✅ " + message.substring(8));
+                        System.out.println("-> " + message.substring(8));
                     } else if (message.startsWith("INFO:")) {
-                        System.out.println("ℹ️  " + message.substring(5));
+                        System.out.println("-> " + message.substring(5));
                     } else if (message.startsWith("SALAS:")) {
                         showRooms(message.substring(6));
                     } else if (message.startsWith("USUARIOS:")) {

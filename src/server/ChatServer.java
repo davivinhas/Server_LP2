@@ -1,11 +1,14 @@
 package server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ChatServer {
+public class ChatServer
+{
     private ServerSocket serverSocket;
     private final int port;
     private boolean isRunning;
@@ -14,8 +17,7 @@ public class ChatServer {
     // Estruturas de dados para gerenciar clientes e salas
     private final ConcurrentHashMap<String, ClientHandler> clients = new ConcurrentHashMap<>();
 
-
-    public ChatServer(int port) {
+    public ChatServer(int port) {  //construtor
         this.port = port;
         this.isRunning = false;
         this.threadPool = Executors.newCachedThreadPool();
@@ -68,6 +70,20 @@ public class ChatServer {
         }
     }
 
+
+    // Métodos para gerenciar clientes
+    public synchronized boolean isUsernameTaken(String nome) {
+        return clients.containsKey(nome);
+    }
+
+    public synchronized void addClient(ClientHandler handler) {
+        clients.put(handler.getUsername(), handler);
+    }
+
+    public synchronized void removeClient(ClientHandler handler) {
+        clients.remove(handler.getUsername());
+    }
+
     // Métodos para gerenciar salas
     public boolean createRoom(String roomName) {
         return roomManager.createRoom(roomName);
@@ -101,20 +117,6 @@ public class ChatServer {
         return roomManager.kickUser(roomName, username);
     }
 
-    // Métodos para gerenciar clientes
-    public synchronized void addClient(ClientHandler client) {
-        clients.put(client.getUsername(), client);
-    }
-
-    public synchronized void removeClient(ClientHandler client) {
-        if (client.getUsername() != null) {
-            clients.remove(client.getUsername());
-        }
-    }
-
-    public boolean isUsernameTaken(String username) {
-        return clients.containsKey(username);
-    }
 
     public static void main(String[] args) {
         int port = 12345;
@@ -126,7 +128,6 @@ public class ChatServer {
                 System.err.println("Porta inválida, usando porta padrão: " + port);
             }
         }
-
         ChatServer server = new ChatServer(port);
 
         // Adiciona shutdown hook para encerrar

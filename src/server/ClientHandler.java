@@ -277,6 +277,10 @@ public class ClientHandler implements Runnable{
         return currentRoom;
     }
 
+    public void setCurrentRoom(String roomName){
+        this.currentRoom = roomName;
+    }
+
     public boolean isAdmin() {
         return isAdmin;
     }
@@ -288,4 +292,5 @@ public class ClientHandler implements Runnable{
     public Socket getSocket() {
         return socket;
     }
+
 }

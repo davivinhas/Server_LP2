@@ -88,6 +88,7 @@ public class RoomManager {
             ClientHandler target = room.getUser(userName);
             if(target != null){
                 room.removeUser(target);
+                target.setCurrentRoom(null);
                 target.sendMessage("INFO:Voce foi expulso da sala '" + roomName + "'.");
                 return true;
             }

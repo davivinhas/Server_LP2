@@ -1,0 +1,24 @@
+README TRABALHO 2- LINGUAGEM DE PROGRAMAÇÃO II
+
+->Alunos:
+-Maria Clara Barboza Teixeira
+-Mateus Alves Ferreira
+-Davi Vinhas
+
+->Professor:
+-Tiago Bonini Borchartt
+
+->Descrição:
+Este projeto implementa um sistema de chat em Java baseado em Sockets, com suporte a múltiplas salas,
+usuários administradores e comunicação em tempo real. O sistema funciona no terminal (modo texto) e permite
+a criação, entrada e gerenciamento de salas de bate-papo.
+
+->Estrutura do projeto:
+-package server:
+ChatServer.java: Classe principal do lado servidor. Escuta conexões, gerencia clientes e delega ações para as salas.
+ClientHandler.java: Gerencia a comunicação com cada cliente conectado.
+Room.java: Representa uma sala de bate-papo.
+RoomManager.java: Coordena a criação, exclusão e gerenciamento de salas.
+-package client
+ChatClient.java: Aplicação cliente. Envia comandos e recebe mensagens do servidor.
+CommandProcessor.java: Interpreta e envia os comandos digitados pelo usuário.
